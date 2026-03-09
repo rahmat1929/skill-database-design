@@ -741,8 +741,7 @@ SET search_path TO tenant_acme, public;
 
 ```
 project/
-├── database/
-│   ├── schema.sql                    
+├── database/                    
 │   ├── migrations/
 │   │   ├── 001_create_users.up.sql
 │   │   ├── 001_create_users.down.sql
@@ -751,9 +750,9 @@ project/
 │   ├── seeds/
 │   │   ├── sample_data.md             # Usage of tables with raw data and description
 │   │   └── sample_data.sql            # Raw data SQL inserts
-│   └── docs/
-│       ├── ERD.md                     # Mermaid ERD (ALWAYS use Mermaid)
-│       └── SCHEMA.md                  # Table documentation
+│   ├── schema.sql
+│   ├── ERD.md                     # Mermaid ERD (ALWAYS use Mermaid)
+│   └── SCHEMA.md                  # Table documentation
 └── README.md
 ```
 
@@ -832,7 +831,7 @@ Before finalizing any schema, verify every item:
 [ ] Migration is wrapped in transaction
 [ ] Migration generates UP and DOWN scripts inside `database/migrations/`
 [ ] sample_data.sql and sample_data.md are provided with raw data and usage descriptions
-[ ] ERD diagram ALWAYS uses Mermaid syntax and is saved in `database/docs/ERD.md`
+[ ] ERD diagram ALWAYS uses Mermaid syntax and is saved in `database/ERD.md`
 ```
 
 ---

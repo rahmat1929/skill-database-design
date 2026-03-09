@@ -1,152 +1,139 @@
 # Database Design Skill
 
-> Production-grade database schema design skill for AI coding assistants.
-> Supports PostgreSQL, MySQL, MongoDB — native SQL, no ORM.
+Production-grade database schema design skill for AI coding assistants. Supports PostgreSQL, MySQL, and MongoDB with native SQL (no ORM). Use it when creating new databases, designing tables, defining relationships, indexing strategies, handling migrations, applying security hardening, or adding multi-tenancy.
 
-## 📁 Skill Contents
+---
 
+## Installation
+
+```bash
+npx skills add https://github.com/rahmat1929/skill-database-design --skill database-design
 ```
+
+### Manual install
+
+Clone and copy to your preferred scope:
+
+| Scope | Path |
+|-------|------|
+| Project (shared) | `.agents/skills/database-design/` |
+| Personal (local) | `~/.cursor/skills/database-design/` |
+
+```bash
+git clone https://github.com/rahmat1929/skill-database-design.git
+cp -r skill-database-design/ .agents/skills/database-design/
+```
+
+### Verify installation
+
+Ask the agent:
+
+> "Design a database for my new task management application."
+
+If it responds by asking clarifying questions (e.g., about scale, multi-tenancy, compliance) or generating a structured schema with Mermaid ERDs, the skill is active.
+
+---
+
+## Skill Contents
+
+```text
 database-design/
 ├── SKILL.md                    # Main skill instructions (1100+ lines)
+├── README.md                   # This file
+├── CHANGELOG.md                # Version history
 └── scripts/
     ├── validate_schema.py      # Schema validation (15 rules, JSON output)
     └── seed_generator.sql      # Sample seed data template
 ```
 
-## 🚀 Quick Start
+---
 
-### Scenario A: New Database (from scratch)
+## How It Works
 
-Copy-paste one of these prompts to your AI assistant:
+| Phase | What happens |
+|-------|-------------|
+| **1. Gather Context** | Asks clarifying questions about database engine, scale, read/write patterns, and compliance if not provided. |
+| **2. Design & Normalize** | Defines core entities, relationships, attributes, and data types with Primary and Foreign Keys. |
+| **3. Indexing & Triggers** | Creates indexes for performance, explicit constraints, custom ENUM types, and auto-updating triggers. |
+| **4. Security & Audit** | Applies Row-Level Security, database roles, data encryption templates, and audit logging tables. |
+| **5. Migration & Output** | Structures the output strictly with `UP`/`DOWN` migrations, seed data, SQL schemas, and Mermaid ERDs. |
 
-#### Prompt 1 — Minimal (AI will ask clarifying questions)
+---
 
-```
-Design a database for my new application.
-```
+## Usage Examples
 
-> The skill will trigger **Step 0: Requirements Gathering** and ask you:
-> - What database engine? (PostgreSQL, MySQL, MongoDB)
-> - Expected scale?
-> - Multi-tenancy needed?
-> - Compliance requirements?
-> - etc.
+### Example 1: New Database (from scratch)
 
-#### Prompt 2 — Detailed (skip clarification, go straight to design)
+**Prompt:**
 
-```
-Design a PostgreSQL database for a task management application:
-- Entities: User, Workspace, Project, Task, Label, Comment, Attachment
-- Relationships:
-  - User belongs to many Workspaces (N:M with roles)
-  - Workspace has many Projects
-  - Project has many Tasks
-  - Task can have Labels (N:M), Comments, Attachments
-  - Tasks support subtasks (self-referencing)
-- Expected: 100K users, 1M tasks/year
-- Read-heavy (task lists, dashboard views)
-- Need audit trail for task status changes
-- Soft delete on all major entities
-- Deploy on Supabase
-- Include: schema SQL, indexes, triggers, RLS policies, migrations, seed data, ERD diagram
-```
+> Design a PostgreSQL database for a task management application:
+> - Entities: User, Workspace, Project, Task, Label, Comment, Attachment
+> - Relationships: User to Workspaces (N:M), Workspaces to Projects (1:N), etc.
+> - Need audit trail, soft delete, and RLS.
 
-#### Prompt 3 — Content Platform
+**What you get:**
 
-```
-Design a PostgreSQL database for a blog/content platform:
-- Entities: User, Post, Category (hierarchical), Tag, Comment, Media
-- Posts can have multiple Tags (N:M)
-- Comments support threading (nested replies)
-- Full-text search on post title and body
-- Soft delete on Users and Posts
-- Generate migrations and seed data
-```
+- A comprehensive set of schemas with correct types (`TIMESTAMPTZ`, `UUID`).
+- Migrations inside `database/migrations/`.
+- Appropriate indexes.
+- Mermaid ERD in `database/ERD.md`.
+- `sample_data.sql` and `sample_data.md` for seed data.
 
-#### Prompt 4 — SaaS Multi-Tenant
+---
 
-```
-Design a multi-tenant PostgreSQL database for a B2B project management tool:
-- Tenants with plans (free, starter, pro, enterprise)
-- Users scoped to tenants, with roles (owner, admin, member, viewer)
-- Projects, Tasks, Comments (threaded)
-- Use shared database with tenant_id + Row-Level Security
-- Include role-based DB access (read-only, read-write, admin)
+### Example 2: Review & Improve Existing Schema
+
+**Prompt:**
+
+> Review my existing database schema and suggest improvements based on production best practices. Check for missing indexes on foreign keys, proper use of TIMESTAMPTZ, and naming conventions. [paste schema]
+
+**What you get:**
+
+- An analysis of the provided schema pointing out anti-patterns.
+- Refactored schema SQL following the skill's strict rules (snake_case, plural tables).
+- Migration scripts to convert old schema to new safely.
+
+---
+
+### Example 3: SaaS Multi-Tenant Platform
+
+**Prompt:**
+
+> Design a multi-tenant PostgreSQL database for a B2B project management tool:
+> - Tenants with plans (free, starter, pro, enterprise)
+> - Users scoped to tenants, with roles
+> - Use shared database with tenant_id + Row-Level Security
+
+**What you get:**
+
+- Complete schema using the `shared DB + tenant_id` pattern.
+- RLS policies to isolate data so users only see their tenant's data.
+- Migrations, table constraints, and sample seed inserts.
+
+---
+
+## Output Structure
+
+The skill enforces the following directory structure when generating new schemas:
+
+```text
+project/
+├── database/                    
+│   ├── migrations/
+│   │   ├── 001_initial_schema.up.sql
+│   │   ├── 001_initial_schema.down.sql
+│   ├── seeds/
+│   │   ├── sample_data.md             # Usage of tables with raw data and description
+│   │   └── sample_data.sql            # Raw data SQL inserts
+│   ├── schema.sql
+│   ├── ERD.md                     # Mermaid ERD (ALWAYS use Mermaid)
+│   └── SCHEMA.md                  # Table documentation
+└── README.md
 ```
 
 ---
 
-### Scenario B: Existing Database / Project
-
-#### Prompt 1 — Review & Improve Existing Schema
-
-```
-Review my existing database schema and suggest improvements based on
-production best practices. Check for:
-- Missing indexes on foreign keys
-- Missing ON DELETE behavior
-- Proper use of TIMESTAMPTZ vs TIMESTAMP
-- Soft delete implementation
-- Naming conventions (snake_case)
-- Security (RLS, sensitive data handling)
-- Performance (index strategy, EXPLAIN ANALYZE recommendations)
-
-Here's my current schema:
-[paste your schema.sql or point to the file]
-```
-
-#### Prompt 2 — Add Feature to Existing Schema
-
-```
-I have an existing application database (PostgreSQL) with these tables:
-users, projects, tasks.
-
-I need to ADD a notification system on top of it:
-- Users receive notifications for task assignments, comments, due dates
-- Support read/unread status per user
-- Support notification preferences (email, push, in-app)
-- Don't break existing tables, only add new ones + migrations
-
-Generate:
-1. New tables (migration UP + DOWN)
-2. Triggers for auto notification creation
-3. Seed data for testing
-4. Updated ERD including existing tables
-```
-
-#### Prompt 3 — Migrate from MySQL to PostgreSQL
-
-```
-I'm migrating from MySQL to PostgreSQL. Here's my current MySQL schema:
-[paste MySQL schema]
-
-Convert it to PostgreSQL with these improvements:
-- Replace ENUM strings with PostgreSQL custom types
-- Replace TIMESTAMP with TIMESTAMPTZ
-- Add proper indexes (MySQL auto-indexes FKs, PostgreSQL doesn't)
-- Add RLS policies for multi-tenant tables
-- Generate migration scripts
-```
-
-#### Prompt 4 — Performance Optimization
-
-```
-My PostgreSQL database has performance issues. Here are the slow queries:
-[paste EXPLAIN ANALYZE output]
-
-Current schema:
-[paste schema]
-
-Help me:
-1. Identify missing or suboptimal indexes
-2. Suggest schema changes for better query performance
-3. Recommend partial indexes, covering indexes, or materialized views
-4. Write the migration to apply changes safely (zero-downtime)
-```
-
----
-
-## 🛠️ Schema Validator
+## Validation Checks & Scripts
 
 Run the Python validator against any SQL file:
 
@@ -164,11 +151,11 @@ python scripts/validate_schema.py --json schema.sql
 python scripts/validate_schema.py --strict schema.sql
 ```
 
-**15 rules checked**: PRIMARY KEY, ON DELETE, created_at, TIMESTAMPTZ, no FLOAT, FK indexes, soft delete, CHECK constraints, snake_case, transactions, no SELECT *, reserved words, updated_at triggers, status type safety, VARCHAR sizing.
+**15 rules checked**: PRIMARY KEY, ON DELETE, `created_at`, `TIMESTAMPTZ`, no FLOAT, FK indexes, soft delete, CHECK constraints, snake_case, transactions, no `SELECT *`, reserved words, updated_at triggers, status type safety, VARCHAR sizing.
 
 ---
 
-## 🌱 Seed Data
+## Seed Data Generation
 
 Load the sample seed data into your database:
 
@@ -180,7 +167,7 @@ The included template demonstrates realistic seed data patterns with proper rela
 
 ---
 
-## 🔧 Supported Platforms
+## Supported Platforms
 
 | Platform | Status |
 |---|---|
@@ -188,9 +175,17 @@ The included template demonstrates realistic seed data patterns with proper rela
 | ChatGPT | ✅ |
 | Gemini | ✅ |
 
-## 📋 Requirements
+---
+
+## Requirements
 
 - Python 3.10+ (for validator, no pip dependencies)
 - PostgreSQL 14+ (recommended, for UUID v7, JSONB, RLS)
 - MySQL 8.0+ (if using MySQL)
 - MongoDB 6.0+ (if using MongoDB)
+
+---
+
+## License
+
+MIT
