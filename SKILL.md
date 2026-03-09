@@ -170,7 +170,7 @@ Define relationships between tables and apply normalization.
 | Read-heavy | Selective denormalization | Cache frequently joined data |
 | Write-heavy | Full normalization | Eliminate update anomalies |
 
-**ERD Template (Mermaid)**:
+**ERD Template (Must ALWAYS use Mermaid)**:
 ```mermaid
 erDiagram
     Tiers ||--o{ Members : "belongs to"
@@ -651,6 +651,35 @@ ALTER TABLE members DROP COLUMN IF EXISTS referral_code;
 
 ---
 
+### Step 8: Sample Data & Documentation (Data Sampel & Dokumentasi)
+
+Generate realistic sample data and document how tables are used.
+> Buat data sampel realistis dan dokumentasikan penggunaan tabel.
+
+**Tasks**:
+1. **Sample Data (`sample_data.sql`)**: Write complete `INSERT` statements with realistic raw data.
+2. **Data Usage (`sample_data.md`)**: Document the usage of the tables with the raw data and descriptions.
+3. **ERD (`ERD.md`)**: **ALWAYS use Mermaid syntax** for the Entity-Relationship Diagram.
+4. **Schema (`SCHEMA.md`)**: Document tables, columns, constraints, and relationships.
+
+**Sample Data Documentation Template (`sample_data.md`)**:
+```markdown
+# Sample Data Usage
+
+### Table: members
+Stores the core user information and points to their active tier.
+
+**Raw Data**:
+```sql
+INSERT INTO members (id, email, full_name, tier_id) VALUES
+('b1c2...', 'member@example.com', 'Alice', 'tier-uuid');
+```
+**Description**:
+- Alice is an active member belonging to the Bronze tier. This record links to `tiers` via `tier_id`.
+```
+
+---
+
 ## Multi-Tenancy Patterns (Pola Multi-Tenancy)
 
 Choose the right isolation strategy based on your requirements.
@@ -713,31 +742,17 @@ SET search_path TO tenant_acme, public;
 ```
 project/
 ├── database/
-│   ├── types/
-│   │   └── custom_types.sql          # ENUMs and custom types
-│   ├── schema/
-│   │   ├── 01_tiers.sql
-│   │   ├── 02_members.sql
-│   │   ├── 03_transactions.sql
-│   │   ├── 04_rewards.sql
-│   │   └── 05_audit.sql
-│   ├── indexes/
-│   │   └── indexes.sql               # All indexes
-│   ├── triggers/
-│   │   ├── updated_at.sql
-│   │   ├── audit_trigger.sql
-│   │   └── point_balance.sql
-│   ├── security/
-│   │   ├── roles.sql                  # Role definitions
-│   │   └── rls_policies.sql           # Row-Level Security
+│   ├── schema.sql                    
 │   ├── migrations/
-│   │   ├── 001_initial_schema.up.sql
-│   │   ├── 001_initial_schema.down.sql
-│   │   └── ...
+│   │   ├── 001_create_users.up.sql
+│   │   ├── 001_create_users.down.sql
+│   │   ├── 002_create_products.up.sql
+│   │   └── 002_create_products.down.sql
 │   ├── seeds/
-│   │   └── seed_data.sql              # Realistic test data
+│   │   ├── sample_data.md             # Usage of tables with raw data and description
+│   │   └── sample_data.sql            # Raw data SQL inserts
 │   └── docs/
-│       ├── ERD.md                     # Mermaid ERD diagram
+│       ├── ERD.md                     # Mermaid ERD (ALWAYS use Mermaid)
 │       └── SCHEMA.md                  # Table documentation
 └── README.md
 ```
@@ -815,8 +830,9 @@ Before finalizing any schema, verify every item:
 [ ] Composite indexes have correct column order (high selectivity first)
 [ ] Migration has both UP and DOWN scripts
 [ ] Migration is wrapped in transaction
-[ ] Seed data is provided for development/testing
-[ ] ERD diagram is up to date
+[ ] Migration generates UP and DOWN scripts inside `database/migrations/`
+[ ] sample_data.sql and sample_data.md are provided with raw data and usage descriptions
+[ ] ERD diagram ALWAYS uses Mermaid syntax and is saved in `database/docs/ERD.md`
 ```
 
 ---
